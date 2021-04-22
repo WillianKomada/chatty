@@ -10,7 +10,7 @@ document.querySelector("#start_chat").addEventListener("click", (event) => {
   const email = document.getElementById("email").value;
   const text = document.getElementById("txt_help").value;
 
-  socket.on("connet", () => {
+  socket.on("connect", () => {
     const params = {
       email,
       text

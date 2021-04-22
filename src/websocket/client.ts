@@ -1,55 +1,60 @@
-import { io } from '../http';
-import { ConnectionsService } from '../services/ConnectionsService';
-import { UsersService } from '../services/UsersService';
-import { MessagesService } from '../services/MessagesService';
+import { io } from "../http";
+import { ConnectionsService } from "../services/ConnectionsService";
+import { UsersService } from "../services/UsersService";
+import { MessagesService } from "../services/MessagesService";
 
 interface IParams {
-  text: string;
-  email: string;
+	text: string;
+	email: string;
 }
 
 io.on("connect", (socket) => {
-  const connectionsService = new ConnectionsService();
-  const usersService = new UsersService();
-  const messagesService = new MessagesService();
+	const connectionsService = new ConnectionsService();
+	const usersService = new UsersService();
+	const messagesService = new MessagesService();
 
-  socket.on("client_first_access", async (params) => {
-    console.log(params);
-    const socket_id = socket.id;
-    const { email, text } = params as IParams;
-    let user_id = null;
+	socket.on("client_first_access", async (params) => {
+		console.log(params);
+		const socket_id = socket.id;
+		const { email, text } = params as IParams;
+		let user_id = null;
 
-    const userExists = await usersService.findByEmail(email);
+		//conexao pra console.log
+		let connectionToLog;
 
-    if (!userExists) {
-      const user = await usersService.create(email);
+		const userExists = await usersService.findByEmail(email);
 
-      await connectionsService.create({
-        socket_id,
-        user_id: user.id
-      });
+		if (!userExists) {
+			const user = await usersService.create(email);
 
-      user_id = user.id;
-    } else {
-      user_id = userExists.id;
+			connectionToLog = await connectionsService.create({
+				socket_id,
+				user_id: user.id,
+			});
 
-      const connection = await connectionsService.findByUserId(userExists.id);
+			user_id = user.id;
+		} else {
+			user_id = userExists.id;
 
-      if (!connection) {
-        await connectionsService.create({
-          socket_id,
-          user_id: userExists.id
-        });
-      } else {
-        connection.socket_id = socket_id;
-        
-        await connectionsService.create(connection);
-      }
-    }
+			const connection = await connectionsService.findByUserId(userExists.id);
 
-    await messagesService.create({
-      text,
-      user_id
-    });
-  });
+			if (!connection) {
+				connectionToLog = await connectionsService.create({
+					socket_id,
+					user_id: userExists.id,
+				});
+			} else {
+				connection.socket_id = socket_id;
+
+				connectionToLog = await connectionsService.create(connection);
+			}
+		}
+
+		console.log(connectionToLog);
+
+		await messagesService.create({
+			text,
+			user_id,
+		});
+	});
 });
