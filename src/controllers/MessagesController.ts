@@ -5,9 +5,9 @@ class MessagesController {
   async create(request: Request, response: Response) {
     const { admin_id, text, user_id } = request.body;
 
-    const messagesServices = new MessagesService();
+    const messagesService = new MessagesService();
 
-    const message = await messagesServices.create({
+    const message = await messagesService.create({
       admin_id,
       text,
       user_id
@@ -19,9 +19,9 @@ class MessagesController {
   async showByUser(request: Request, response: Response) {
     const { id } = request.params;
 
-    const messagesServices = new MessagesService();
+    const messagesService = new MessagesService();
 
-    const list = await messagesServices.listByUser(id);
+    const list = await messagesService.listByUser(id);
 
     return response.json(list);
   }

@@ -14,6 +14,7 @@ io.on("connect", (socket) => {
   const messagesService = new MessagesService();
 
   socket.on("client_first_access", async (params) => {
+    console.log(params);
     const socket_id = socket.id;
     const { email, text } = params as IParams;
     let user_id = null;
